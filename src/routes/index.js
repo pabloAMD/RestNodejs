@@ -20,5 +20,10 @@ router.get('/agrego', (req, res) => {
 
 });
 
+router.post('/', (req, res) => {
+    const { producto, precio, img } = req.body;
+    res.sen('received')
+});
+
 
 module.exports = router;
