@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="parametros" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: object
+properties:
+    bankD:
+        type: string
+    idV:
+        type: string
+    bankR:
+        type: string
+    idC:
+        type: string
+    precio:
+        type: number]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#cdc074be-0437-4ca4-a4da-97910e2563a1">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="parametros"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#8f359471-4162-4513-892c-e54ae32beac4">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="parametros"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+</types:mule>

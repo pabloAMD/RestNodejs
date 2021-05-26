@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2b0698f6-190f-4999-b4bf-fb0cdf79d424" >
+		<http:listener-connection host="localhost" port="8081" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:public-resource />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="1ac9a9ac-e875-4020-b2f0-de9f1647f3ef" >
+		<http:request-connection host="localhost" port="8080" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="0e82c2d5-812b-4f31-9966-2f14bfc71a5f" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="c21a0a45-e174-42fe-ad54-5d3ed4539988" >
+		<http:request-connection host="localhost" port="3030" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration3" doc:name="HTTP Request configuration" doc:id="e434ff07-a11e-4491-bedf-015014b4daa7" >
+		<http:request-connection host="localhost" port="8080" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="82589afc-7948-4347-90b2-62e3eb3873af" >
+		<http:listener-connection host="localhost" port="8085" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:public-resource />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration4" doc:name="HTTP Request configuration" doc:id="3cfbfd1e-7fa2-4faf-9b99-56ea803d7dfa" >
+		<http:request-connection host="localhost" port="3000" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration5" doc:name="HTTP Request configuration" doc:id="53a62be1-e2bb-4ae0-8e97-aefc0ae91218" >
+		<http:request-connection host="localhost" port="3040" />
+	</http:request-config>
+	<flow name="administracionFlow" doc:id="b29eeb47-c60f-4efe-a587-fcf6693a439d" >
+		<http:listener doc:name="Listener" doc:id="fa2aa0ed-63cb-42f8-81db-e5bedcda8717" config-ref="HTTP_Listener_config" path="/Administracion" outputMimeType="application/json" allowedMethods="GET">
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="c99c707e-cc84-4a39-b9b3-6e4b2240afea" message="listener entro #[attributes.queryParams]"/>
+		<set-payload value="#[output application/java&#10;---&#10;{&#10;	bankD: attributes.queryParams.BancosDeposito,&#10;	idV: attributes.queryParams.IDVendedor,&#10;	bankR: attributes.queryParams.BancosRetiro,&#10;	idC: attributes.queryParams.IDComprador,&#10;	precio: attributes.queryParams.precio&#10;}]" doc:name="Set Payload" doc:id="cdc074be-0437-4ca4-a4da-97910e2563a1" />
+		<choice doc:name="Choice" doc:id="29c24258-a8e0-4864-891c-e57ab8277c01" >
+			<when expression='#[payload.bankD=="Austro"]'>
+				<http:request method="GET" doc:name="Request" doc:id="92534a89-1eb8-4661-b4a9-dc9925cc9fb5" config-ref="HTTP_Request_configuration" path="/Service/Servicios/depositar/{id}/{valor}/{bancoDeposito}/{numeroCuentaD}">
+					<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"numeroCuentaD" : payload.idC,
+	"id" : payload.idV,
+	"bancoDeposito" : payload.bankR,
+	"valor" : payload.precio
+}]]]></http:uri-params>
+				</http:request>
+			</when>
+			<when expression='#[payload.bankD=="Guayaquil"]'>
+				<http:request method="GET" doc:name="Request" doc:id="5b002303-ea8a-4dc2-9c6a-65d0e45c849e" config-ref="HTTP_Request_configuration5" path="/api/Guayaquil">
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"numeroCuentaD" : payload.idC,
+	"id" : payload.idV,
+	"bancoDeposito" : payload.bankR,
+	"valor" : payload.precio
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="11182c06-6530-4bbf-a9d8-48053dfc3f02" message="No se encontro un Banco"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="85933ae1-1aaf-44a6-b116-9cd9bc1783c3" message="atributos -- llegando #[payload]"/>
+		<set-payload value="#[output application/java&#10;---&#10;{&#10;	bankR: payload.nombreBanco,&#10;	idC: payload.numeroCuenta,&#10;	precio: payload.precio&#10;}]" doc:name="Set Payload" doc:id="8f359471-4162-4513-892c-e54ae32beac4" />
+		<logger level="INFO" doc:name="Logger" doc:id="b061dc0f-0738-4867-a4c8-a0ef930ad1f5" message='actual #[payload]'/>
+		<choice doc:name="Choice" doc:id="e3a93c03-239c-458a-80eb-8d1bfdeb63d1" >
+			<when expression='#[payload.bankR=="Jep"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="2e501dc8-859f-4a5d-8588-ff151c12be0a" message="lo que sea"/>
+				<http:request method="GET" doc:name="Request" doc:id="7f57b0ab-9e78-45b9-ab00-fb0251d77fdd" config-ref="HTTP_Request_configuration2" path="/api/users">
+					<http:query-params><![CDATA[#[output application/java
+---
+{
+	"id" : payload.bankR,
+	"geo" : payload.idC,
+	"token" : payload.precio
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="1c323375-594d-487c-a382-5c75da40a66d" message="no se encontro un banco"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="administracionFlow1" doc:id="05bb9167-ff03-4ed8-8793-fd07f07576bc" >
+		<http:listener doc:name="Listener2" doc:id="e9008e8b-2703-4203-a744-294038a5c1f7" config-ref="HTTP_Listener_config1" path="/productoss" allowedMethods="GET"/>
+		<http:request method="GET" doc:name="Request" doc:id="f5aa1e4c-04b5-439d-b576-00d7108a6573" config-ref="HTTP_Request_configuration4" path="/api/productos"/>
+	</flow>
+</mule>
